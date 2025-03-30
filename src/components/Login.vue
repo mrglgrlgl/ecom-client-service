@@ -1,87 +1,96 @@
 <template>
-    <v-card
-      class="mx-auto"
-      max-width="344"
-      title="User Login"
-    >
-      <v-container>
+    <div>
+      <v-container class="mb-6">
+        <v-row
+          class="text-center align-center justify-center"
+          align="center"
+          style="height: 150px"
+          no-gutters
+        >
+          <v-col cols="6">
+            <v-card>
+              <v-card-title class="pa-2 ma-2">
+                <h2>Login</h2>
+              </v-card-title>
   
-        <v-form ref="loginForm" v-model="valid">
-          <v-text-field
-            v-model="email"
-            color="primary"
-            label="Email"
-            variant="underlined"
-            :rules="[rules.required, rules.email]"
-          ></v-text-field>
+              <hr class="mx-10" />
   
-          <v-text-field
-            v-model="password"
-            color="primary"
-            label="Password"
-            placeholder="Enter your password"
-            variant="underlined"
-            type="password"
-            :rules="[rules.required]"
-          ></v-text-field>
+              <v-card-text>
+                <v-form class="pa-2 ma-2" @submit.prevent="submit">
+                  <v-container>
+                    <v-row>
+                      <v-col cols="12" md="4">
+                        <v-text-field
+                          v-model="email"
+                          label="Email"
+                          required
+                          type="email"
+                          rounded
+                          variant="solo"
+                        />
+                      </v-col>
   
-          <v-divider></v-divider>
+                      <v-col cols="12" md="4">
+                        <v-text-field
+                          v-model="password"
+                          label="Password"
+                          required
+                          type="password"
+                          rounded
+                          variant="solo"
+                        />
+                      </v-col>
   
-          <v-card-actions class="justify-center">
-            <v-btn color="success" type="submit" @click="login" :disabled="!valid">
-              Login  
-              <v-icon icon="mdi-chevron-right" end></v-icon>
-            </v-btn>
-          </v-card-actions>
-        </v-form>
-  
+                      <v-col cols="12" md="4">
+                        <v-btn
+                          class="primary"
+                          size="large"
+                          variant="tonal"
+                          rounded
+                          type="submit"
+                        >
+                          Login
+                        </v-btn>
+                      </v-col>
+                    </v-row>
+                  </v-container>
+                </v-form>
+              </v-card-text>
+            </v-card>
+          </v-col>
+        </v-row>
       </v-container>
-    </v-card>
+    </div>
   </template>
   
-  <script setup>
-  import { ref } from 'vue'
-  
-  const email = ref('')
-  const password = ref('')
-  const valid = ref(false)
-  
-  const rules = {
-    required: (value) => !!value || "This field is required.",
-    email: (value) =>
-      /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) || "E-mail must be valid.",
-  };
-  
-  const login = async () => {
-    if (valid.value) {
-      console.log('Login attempt with credentials:', {
-        email: email.value,
-        password: password.value,
-      });
-  
-      try {
-        // Example API call to authenticate user
-        const response = await fetch('/api/login', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ email: email.value, password: password.value }),
-        });
-  
-        if (response.ok) {
-          const data = await response.json();
-          console.log('Login successful:', data);
-          // Handle successful login logic here (e.g., redirect to dashboard)
-        } else {
-          console.error('Login failed:', response.statusText);
-          // Handle failed login logic here (e.g., show error message)
-        }
-      } catch (error) {
-        console.error('Error during login:', error);
-        // Handle error during login here (e.g., show error message)
-      }
-    }
+  <script>
+import auth from '@/api/auth/auth'
+
+  export default {
+    name: "Login",
+    data() {
+      return {
+        email: null,
+        password: null,
+      };
+    },
+    methods: {
+      async submit() {
+        await auth.login({
+            email: this.email,
+            password: this.password,
+        })
+        .then((response) => {
+            const data = response.data;
+
+            data.expiration_date = new Date(
+                Date.now() + data.expires_in).toISOString();
+
+                localStorage.setItem("auth", JSON.stringify(data));
+        })
+        .catch()
+        .finally();
+      },
+    },
   };
   </script>
-  
