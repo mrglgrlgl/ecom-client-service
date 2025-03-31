@@ -1,22 +1,22 @@
-import Login from "@/components/Login.vue";
 import axios from "axios";
 
 const http = (baseUrl) => {
-        const http = axios.create({ baseURL: baseUrl })
-        http.interceptors.request.use((config) => {
-            config.headers.Accept = "application/json";
+  const http = axios.create({ baseURL: baseUrl });
 
-            return config;
-        });
-        return http;
-    };
+  http.interceptors.request.use((config) => {
+    config.headers.Accept = "application/json";
 
+    return config;
+  });
 
-export default{
-    baseUrl: 'http://localhost:8000',
-    endpoint: '/api',
+  return http;
+};
 
-    login(params){
-        return http(this.baseUrl).post(`${this.endpoint}/login`, params);
-    }
+export default {
+  baseUrl: import.meta.env.VITE_APP_AUTH_SERVICE_URL,
+  endpoint: "/api",
+
+  login(params) {
+    return http(this.baseUrl).post(`${this.endpoint}/login`, params);
+  },
 };
